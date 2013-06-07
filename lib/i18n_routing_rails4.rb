@@ -42,15 +42,15 @@ module I18nRouting
             opts = options.dup
             opts[:path] = localized_path
             opts[:controller] ||= r.to_s.pluralize
+            opts[:locale] = locale.to_sym
 
             resource = resource_from_params(type, r, opts.dup)
 
             res = ["#{I18nRouting.locale_escaped(locale)}_#{r}".to_sym, opts]
 
             constraints = opts[:constraints] ? opts[:constraints].dup : {}
-            constraints[:locale] = locale.to_s
 
-            scope(:constraints => constraints, :path_names => I18nRouting.path_names(resource.name, @scope)) do
+            scope(constraints: constraints, :path_names => I18nRouting.path_names(resource.name, @scope)) do
               localized_branch(locale) do
                 send(type, *res) do
 
@@ -245,11 +245,7 @@ module I18nRouting
       set_localizable_route(cur_scope) do
         skip_localization do
           #puts "#{' ' * nested_deep} \\- Call original #{type} : for #{resources.inspect}}"
-          begin
-            send("#{type}_without_i18n_routing".to_sym, *resources, &block)
-          rescue Exception => e
-            puts e
-          end
+          send("#{type}_without_i18n_routing".to_sym, *resources, &block)
         end
       end
 
