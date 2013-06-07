@@ -48,7 +48,7 @@ module I18nRouting
             res = ["#{I18nRouting.locale_escaped(locale)}_#{r}".to_sym, opts]
 
             constraints = opts[:constraints] ? opts[:constraints].dup : {}
-            constraints[:i18n_locale] = locale.to_s
+            constraints[:locale] = locale.to_s
 
             scope(:constraints => constraints, :path_names => I18nRouting.path_names(resource.name, @scope)) do
               localized_branch(locale) do
@@ -119,12 +119,6 @@ module I18nRouting
     # prepare routing system to be i18n ready
     def initialize_with_i18n_routing(*args)
       initialize_without_i18n_routing(*args)
-
-      # Add i18n_locale as valid conditions for Rack::Mount / And add also :locale, as Rails 3.0.4 removed it ...
-      # @valid_conditions = @set.instance_eval { @set }.instance_eval { @valid_conditions }
-      # [:i18n_locale, :locale].each do |k|
-      #   @set.valid_conditions[k] = true if !@set.valid_conditions.has_key?(k)
-      # end
 
       # Extends the current RouteSet in order to define localized helper for named routes
       # When calling define_url_helper, it calls define_localized_url_helper too.
@@ -334,7 +328,7 @@ module I18nRouting
         @path = @localized_path
         @path = "#{@path}(.:format)" if append_format
         @options[:constraints] = @options[:constraints] ? @options[:constraints].dup : {}
-        @options[:constraints][:i18n_locale] = locale.to_s
+        @options[:constraints][:locale] = locale.to_s
         @options[:anchor] = true
         # Force the recomputation of the requirements with the new values
         @requirements = nil
@@ -403,11 +397,11 @@ module I18nRouting
       mod.send :alias_method_chain, :score, :i18n_routing
     end
 
-    # During route initialization, if a condition i18n_locale is present
+    # During route initialization, if a condition locale is present
     # Delete it, store it in @locale, and add it to @defaults
     def initialize_with_i18n_routing(name, app, path, constraints, defaults = {})
-      @locale = if constraints.key?(:i18n_locale)
-        c = constraints.delete(:i18n_locale)
+      @locale = if constraints.key?(:locale)
+        c = constraints.delete(:locale)
         # In rails 3.0 it's a regexp otherwise it's a string, so we need to call source on the regexp
         (c.respond_to?(:source) ? c.source : c).to_sym
       else
