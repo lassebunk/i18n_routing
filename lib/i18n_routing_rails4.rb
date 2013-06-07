@@ -40,7 +40,7 @@ module I18nRouting
           if !localized_path.blank? and String === localized_path
             puts("[I18n] > localize %-10s: %40s (%s) => /%s" % [type, resource.name, locale, localized_path]) if @i18n_verbose
             opts = options.dup
-            opts[:path] = localized_path
+            opts[:path] = @locales.count > 1 ? "#{locale}/#{localized_path}" : localized_path
             opts[:controller] ||= r.to_s.pluralize
             opts[:locale] = locale.to_sym
 
@@ -238,7 +238,7 @@ module I18nRouting
         if !@localized_branch
           r = resource_from_params(type, *resources)
           parent_resource.inspect
-          cur_scope = (parent_resource and parent_resource.name == r.name) ? parent_resource : r 
+          cur_scope = (parent_resource and parent_resource.name == r.name) ? parent_resource : r
         end
       end
 
@@ -301,6 +301,7 @@ module I18nRouting
     attr_reader :path
 
     def initialize(locale, set, scope, path, options)
+
       super(set, scope, path.clone, options ? options.clone : nil)
       stored_locale = I18n.locale
 
