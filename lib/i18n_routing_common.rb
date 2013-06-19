@@ -10,19 +10,16 @@ module I18nRouting
   def self.translation_for(name, type = :resources, option = nil)
     # First, if an option is given, try to get the translation in the routes scope
     if option
-      default = "{option}Noi18nRoutingTranslation"
-      t = I18n.t(option, :scope => "routes.#{name}.#{type}", :default => default)
-      return (t == default ? nil : t)
+      t = Admin::AppConfig.get("#{I18n.locale}.routes.#{name}.#{type}.option")
+      return t
     else
-      default = "{name}Noi18nRoutingTranslation"
-
       # Try to get the translation in routes namescope first
-      t = I18n.t(:as, :scope => "routes.#{name}", :default => default)
+      t = Admin::AppConfig.get("#{I18n.locale}.routes.#{name}.as")
 
-      return t if t and t != default
+      return t if t
 
-      t = I18n.t(name.to_s, :scope => type, :default => default)
-      return (t == default ? nil : t)
+      t = Admin::AppConfig.get("#{I18n.locale}.routes.#{type}.#{name}")
+      return t
     end
   end
 
@@ -42,7 +39,7 @@ module I18nRouting
       n = translation_for(name, :path_names, pn)
       n = nil if n == pn.to_s
       # Get default path_names in path_names scope if no path_names found
-      n ||= I18n.t(pn, :scope => :path_names, :default => name.to_s)
+      n ||= Admin::AppConfig.get("#{I18n.locale}.routes.#{path_names}.#{pn}") || name.to_s
 
       h[pn] = n if n and n != name.to_s
     end
