@@ -1,4 +1,5 @@
 # encoding: utf-8
+require 'action_dispatch/journey'
 require 'action_dispatch/journey/router'
 require 'action_dispatch'
 require 'active_support/core_ext/module'
